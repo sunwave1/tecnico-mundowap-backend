@@ -36,6 +36,10 @@ return static function (RouteBuilder $routes) {
                 'only' => ['create', 'update', 'index'],
             ]);
 
+            $routes->resources('Workdays', [
+                'only' => ['create', 'update', 'index'],
+            ]);
+
             $routes->resources('Addresses', [
                 'only' => ['create', 'update', 'index'],
             ]);
