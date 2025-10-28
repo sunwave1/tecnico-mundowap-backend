@@ -32,6 +32,10 @@ return static function (RouteBuilder $routes) {
 
             $routes->setExtensions(['json']);
 
+            $routes->resources('Visit', [
+                'only' => ['create', 'update', 'index'],
+            ]);
+
             $routes->resources('Addresses', [
                 'only' => ['create', 'update', 'index'],
             ]);
