@@ -51,7 +51,7 @@ class VisitController extends ApiController
             $this->set([
                 'status_code' => 200,
                 'status' => 'success',
-                'message' => 'workday created successfully',
+                'message' => 'visit created successfully',
                 'data' => $entityVisit
             ]);
 
@@ -61,8 +61,8 @@ class VisitController extends ApiController
 
             $this->set([
                 'status_code' => 500,
-                'error' => 'failed to save workday',
-                'message' => 'database error while saving workday',
+                'error' => 'failed to save visit',
+                'message' => 'database error while saving visit',
                 'details' => $e->getEntity()->getErrors()
             ]);
 
@@ -99,7 +99,7 @@ class VisitController extends ApiController
             $this->set([
                 'status_code' => 200,
                 'status' => 'success',
-                'message' => 'workday updated successfully',
+                'message' => 'visit updated successfully',
                 'data' => $entityVisit
             ]);
 
@@ -109,8 +109,8 @@ class VisitController extends ApiController
 
             $this->set([
                 'status_code' => 500,
-                'error' => 'failed to update workday',
-                'message' => 'database error while updating workday',
+                'error' => 'failed to update visit',
+                'message' => 'database error while updating visit',
                 'details' => $e->getEntity()->getErrors()
             ]);
 
