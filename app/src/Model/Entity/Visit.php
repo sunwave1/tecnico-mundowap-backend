@@ -32,5 +32,14 @@ class Visit extends Entity
         'forms' => true,
         'products' => true,
         'duration' => true,
+        'address' => true,
     ];
+
+    public function applyDuration() {
+        $this->duration = $this->getDuration();
+    }
+
+    public function getDuration() {
+        return (($this->forms * 15) + ($this->products * 5)) * 60;
+    }
 }

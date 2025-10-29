@@ -50,34 +50,12 @@ class AddressesTable extends Table
      */
     public function validationDefault(Validator $validator): Validator
     {
-        $validator
-            ->scalar('foreign_table')
-            ->maxLength('foreign_table', 100)
-            ->requirePresence('foreign_table', 'create')
-            ->notEmptyString('foreign_table');
-
-        $validator
-            ->integer('foreign_id')
-            ->requirePresence('foreign_id', 'create')
-            ->notEmptyString('foreign_id');
 
         $validator
             ->scalar('postal_code')
             ->maxLength('postal_code', 8)
             ->requirePresence('postal_code', 'create')
             ->notEmptyString('postal_code');
-
-        $validator
-            ->scalar('state')
-            ->maxLength('state', 2)
-            ->requirePresence('state', 'create')
-            ->notEmptyString('state');
-
-        $validator
-            ->scalar('city')
-            ->maxLength('city', 200)
-            ->requirePresence('city', 'create')
-            ->notEmptyString('city');
 
         $validator
             ->scalar('sublocality')
@@ -100,7 +78,7 @@ class AddressesTable extends Table
         $validator
             ->scalar('complement')
             ->maxLength('complement', 200)
-            ->notEmptyString('complement');
+            ->allowEmptyString('complement', null);
 
         return $validator;
     }

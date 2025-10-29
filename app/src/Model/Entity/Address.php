@@ -46,6 +46,9 @@ class Address extends Entity
 
     protected function _getPostalCodeMask()
     {
+        if(is_null($this->postal_code)) {
+            return null;
+        }
         return preg_match('/^[0-9]{5}\-[0-9]{3}$/', $this->postal_code)
             ? $this->postal_code
             : preg_replace('/^(\d{5})(\d{3})$/', '$1-$2', $this->postal_code);

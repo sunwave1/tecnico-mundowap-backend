@@ -7,6 +7,9 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\Event\EventInterface;
+use ArrayObject;
+use Cake\Datasource\EntityInterface;
 
 /**
  * Visits Model
@@ -37,9 +40,25 @@ class VisitsTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('visits');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
+        $this->setTable("visits");
+        $this->setDisplayField("id");
+        $this->setPrimaryKey("id");
+
+        $this->hasOne('Address', [
+            'className' => 'Addresses',
+            'foreignKey' => 'foreign_id',
+            'bindingKey' => 'id',
+            'dependent' => true,
+            'cascadeCallbacks' => true,
+            'propertyName' => 'address'
+        ]);
+    }
+
+    public function beforeSave(EventInterface $event, EntityInterface $entity, ArrayObject $options)
+    {
+        if ($entity->isNew()) {
+            $entity->applyDuration();
+        }
     }
 
     /**
@@ -51,27 +70,27 @@ class VisitsTable extends Table
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->date('date')
-            ->requirePresence('date', 'create')
-            ->notEmptyDate('date');
+            ->date("date")
+            ->requirePresence("date", "create")
+            ->notEmptyDate("date");
 
         $validator
-            ->integer('completed')
-            ->notEmptyString('completed');
+            ->integer("completed")
+            ->allowEmptyString("completed", null);
 
         $validator
-            ->integer('forms')
-            ->requirePresence('forms', 'create')
-            ->notEmptyString('forms');
+            ->integer("forms")
+            ->requirePresence("forms", "create")
+            ->notEmptyString("forms");
 
         $validator
-            ->integer('products')
-            ->requirePresence('products', 'create')
-            ->notEmptyString('products');
+            ->integer("products")
+            ->requirePresence("products", "create")
+            ->notEmptyString("products");
 
         $validator
-            ->integer('duration')
-            ->notEmptyString('duration');
+            ->integer("duration")
+            ->notEmptyString("duration");
 
         return $validator;
     }
