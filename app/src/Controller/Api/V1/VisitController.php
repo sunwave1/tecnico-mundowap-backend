@@ -67,6 +67,8 @@ class VisitController extends ApiController
                 $entityWorkday = $this->Workdays->newEntity([
                     'date' => $payload['date'],
                     'visits' => 1,
+                    'duration' => $entityVisit->getDuration(),
+                    'completed' => $entityVisit->completed === 1 ? 1 : 0
                 ]);
 
                 $this->Workdays->saveOrFail($entityWorkday);
@@ -74,6 +76,8 @@ class VisitController extends ApiController
             } else {
 
                 $workday->visits++;
+                $workday->duration += $entityVisit->getDuration();
+                $workday->completed += $entityVisit->completed === 1 ? 1 : 0;
 
                 $this->Workdays->saveOrFail($workday);
 
@@ -292,10 +296,7 @@ class VisitController extends ApiController
 
             $newWorkdayEntity->visits++;
             $newWorkdayEntity->duration += $entityVisit->getDuration();
-
-            if($entityVisit->completed === 1) {
-                $newWorkdayEntity->completed++;
-            }
+            $newWorkdayEntity->completed += $entityVisit->completed === 1 ? 1 : 0;
         }
 
         $this->Workdays->saveOrFail($newWorkdayEntity);
