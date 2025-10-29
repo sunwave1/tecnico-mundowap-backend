@@ -41,4 +41,13 @@ class Address extends Entity
         'street_number' => true,
         'complement' => true,
     ];
+
+    protected $_virtual = ['postal_code_mask'];
+
+    protected function _getPostalCodeMask()
+    {
+        return preg_match('/^[0-9]{5}\-[0-9]{3}$/', $this->postal_code)
+            ? $this->postal_code
+            : preg_replace('/^(\d{5})(\d{3})$/', '$1-$2', $this->postal_code);
+    }
 }

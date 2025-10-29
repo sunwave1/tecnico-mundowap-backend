@@ -5,6 +5,9 @@ namespace App\Controller\Api\V1;
 
 use Cake\ORM\Exception\PersistenceFailedException;
 
+use App\Services\ManagerServiceCep;
+use App\Services\Enums\CepRequestError;
+
 /**
  * Api/V1/Addresses Controller
  *
@@ -44,7 +47,35 @@ class AddressesController extends ApiController
             return;
         }
 
+        $service = new ManagerServiceCep();
+
+        $responseServiceCep = $service->consult($payload['postal_code']);
+
+        if($responseServiceCep instanceof CepRequestError) {
+
+            $isCepNotFound = $responseServiceCep == CepRequestError::CepNotFound;
+
+            $this->set([
+                'status_code' => 400,
+                'error' => 'cep search failed',
+                'message' => $isCepNotFound ? 'please check your postal code' : 'our providers are down, wait a few minutes and search again',
+                'details' => $isCepNotFound ? 'cep not found' : 'providers are down'
+            ]);
+
+            $this->response = $this->response->withStatus(400);
+
+            return;
+        }
+
         try {
+
+            $cepData = $responseServiceCep
+                ->toCollection()
+                ->toArray();
+
+            $entityAddress->set('postal_code', $cepData['postal_code']);
+            $entityAddress->set('state', $cepData['uf']);
+            $entityAddress->set('city', $cepData['city']);
 
             $this->Addresses->saveOrFail($entityAddress);
 
@@ -52,7 +83,7 @@ class AddressesController extends ApiController
                 'status_code' => 200,
                 'status' => 'success',
                 'message' => 'address created successfully',
-                'data' => $entityAddress
+                'data' => $entityAddress,
             ]);
 
         } catch (PersistenceFailedException $e) {
