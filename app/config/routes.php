@@ -32,7 +32,7 @@ return static function (RouteBuilder $routes) {
 
             $routes->setExtensions(['json']);
 
-            $routes->scope('/visit', function(RouteBuilder $routes) {
+            $routes->scope('/visits', function(RouteBuilder $routes) {
 
                 $routes
                     ->get('/', ['controller' => 'Visit', 'action' => 'index']);
@@ -50,9 +50,17 @@ return static function (RouteBuilder $routes) {
                     ->setMethods(['PUT', 'PATCH']);
             });
 
-            $routes->resources('Workdays', [
-                'only' => ['create', 'update', 'index'],
-            ]);
+            $routes->scope('/workdays', function(RouteBuilder $routes) {
+
+                $routes
+                    ->get('/', ['controller' => 'Workdays', 'action' => 'index']);
+
+                $routes
+                    ->post('/close/{date}', ['controller' => 'Workdays', 'action' => 'close'])
+                    ->setPatterns(['date' => '\d{4}-\d{2}-\d{2}'])
+                    ->setPass(['date']);
+
+            });
 
         });
 
