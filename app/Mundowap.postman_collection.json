@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "bfdcd806-5b60-44da-9a20-33d52cea6b97",
+		"name": "Mundowap",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32078276",
+		"_collection_link": "https://autooferta-app.postman.co/workspace/Autooferta-app~29a422f1-f489-467f-8d1e-716776f42717/collection/32078276-bfdcd806-5b60-44da-9a20-33d52cea6b97?action=share&source=collection_link&creator=32078276"
+	},
+	"item": [
+		{
+			"name": "Visits",
+			"item": [
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:13001/api/v1/visits/2024-10-29",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "13001",
+							"path": [
+								"api",
+								"v1",
+								"visits",
+								"2024-10-29"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"date\": \"2025-10-29\",\r\n    \"forms\": 2,\r\n    \"products\": 1,\r\n    \"address\": {\r\n        \"postal_code\": \"17047202\",\r\n        \"sublocality\": \"Jardim Brasil\",\r\n        \"street\": \"R. Irmã Arminda\",\r\n        \"street_number\": \"6-89\",\r\n        \"complement\": \"segundo andar\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:13001/api/v1/visits",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "13001",
+							"path": [
+								"api",
+								"v1",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"date\": \"2025-10-31\",\r\n    \"forms\": 2,\r\n    \"products\": 1,\r\n    \"address\": {\r\n        \"postal_code\": \"17047202\",\r\n        \"sublocality\": \"Jardim Brasil\",\r\n        \"street\": \"R. Irmã Arminda\",\r\n        \"street_number\": \"6-89\",\r\n        \"complement\": \"segundo andar\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:13001/api/v1/visits/74",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "13001",
+							"path": [
+								"api",
+								"v1",
+								"visits",
+								"74"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workdays",
+			"item": [
+				{
+					"name": "List",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"date\": \"2025-10-28\",\r\n    \"forms\": 1,\r\n    \"products\": 2\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:13001/api/v1/workdays",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "13001",
+							"path": [
+								"api",
+								"v1",
+								"workdays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Close day",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:13001/api/v1/workdays/close/2024-10-29",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "13001",
+							"path": [
+								"api",
+								"v1",
+								"workdays",
+								"close",
+								"2024-10-29"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
