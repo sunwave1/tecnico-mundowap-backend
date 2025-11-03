@@ -245,10 +245,12 @@ class VisitController extends ApiController
 
         $totalDuration = $this->Visits
             ->find()
-            ->where([ 'date' => $entityVisit->date ])
-            ->where([ 'id != ' => $entityVisit->id ])
-            ->all()
-            ->sumOf(fn($it) => $it->getDuration()) + $entityVisit->getDuration();
+            ->select('total' => $this->Visits->query()->func()->sum('duration'))
+            ->where([
+                'date' => $entityVisit->date,
+                'id !=' => $entityVisit->id
+            ])
+            ->total + $entityVisit->getDuration();
 
         if($totalDuration > 28800) {
             return ReturnValue::DURATION_WORKDAYS_EXCEEDED;
