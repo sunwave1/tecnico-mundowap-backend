@@ -112,7 +112,7 @@ class WorkdaysController extends ApiController
                 'status' => 'success',
                 'message' => 'visit moved with success',
                 'movedCount' => $movedCount,
-                'totalMoved' => $totalToMove
+                'toMove' => $totalToMove
             ]);
 
         } catch(PersistenceFailedException $e) {
