@@ -245,7 +245,7 @@ class VisitController extends ApiController
 
         $totalDuration = $this->Visits
             ->find()
-            ->select('total' => $this->Visits->query()->func()->sum('duration'))
+            ->select(['total' => $this->Visits->query()->func()->sum('duration')])
             ->where([
                 'date' => $entityVisit->date,
                 'id !=' => $entityVisit->id
