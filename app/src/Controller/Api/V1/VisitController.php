@@ -80,8 +80,6 @@ class VisitController extends ApiController
                 $this->Workdays->saveOrFail($workday);
             }
 
-            $connection = $this->Visits->getConnection();
-
             $entityVisit->address->set([
                 "foreign_table" => "visits",
                 "state" => "",
@@ -91,6 +89,8 @@ class VisitController extends ApiController
             $this->Visits->saveOrFail($entityVisit, [
                 "associated" => ["Address"],
             ]);
+
+            $this->Visits->getConnection()->commit();
 
             $this->set([
                 "status_code" => 200,
