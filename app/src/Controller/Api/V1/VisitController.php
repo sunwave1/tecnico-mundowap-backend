@@ -16,38 +16,39 @@ use Cake\Log\Log;
  */
 class VisitController extends ApiController
 {
-    public function initialize(): void {
+    public function initialize(): void
+    {
         parent::initialize();
 
-        $this->loadModel('Visits');
-        $this->loadModel('Addresses');
-        $this->loadModel('Workdays');
+        $this->loadModel("Visits");
+        $this->loadModel("Addresses");
+        $this->loadModel("Workdays");
     }
 
-    public function index(string $date): void {
+    public function index(string $date): void
+    {
         $this->set([
-            'items' => $this->Visits
-                ->find('all')
-                ->where(['date' => $date])
-                ->toArray()
+            "items" => $this->Visits
+                ->find("all")
+                ->where(["date" => $date])
+                ->toArray(),
         ]);
     }
 
-    public function add(): void {
-
+    public function add(): void
+    {
         $payload = $this->request->getData();
 
         $entityVisit = $this->Visits->newEntity($payload, [
-            'associated' => ['Address']
+            "associated" => ["Address"],
         ]);
 
-        if($error = $entityVisit->getErrors()) {
-
+        if ($error = $entityVisit->getErrors()) {
             $this->set([
-                'status_code' => 400,
-                'error' => 'validation failed',
-                'message' => 'please check the provided data',
-                'details' => $error
+                "status_code" => 400,
+                "error" => "validation failed",
+                "message" => "please check the provided data",
+                "details" => $error,
             ]);
 
             $this->response = $this->response->withStatus(400);
@@ -55,85 +56,80 @@ class VisitController extends ApiController
             return;
         }
 
+        $this->Visits->getConnection()->begin();
         try {
-
             $workday = $this->Workdays
                 ->find()
-                ->where([ 'date' => $payload['date'] ])
+                ->where(["date" => $payload["date"]])
                 ->first();
 
-            if(is_null($workday)) {
-
+            if (is_null($workday)) {
                 $entityWorkday = $this->Workdays->newEntity([
-                    'date' => $payload['date'],
-                    'visits' => 1,
-                    'duration' => $entityVisit->getDuration(),
-                    'completed' => $entityVisit->completed === 1 ? 1 : 0
+                    "date" => $payload["date"],
+                    "visits" => 1,
+                    "duration" => $entityVisit->getDuration(),
+                    "completed" => $entityVisit->completed === 1 ? 1 : 0,
                 ]);
 
                 $this->Workdays->saveOrFail($entityWorkday);
-
             } else {
-
                 $workday->visits++;
                 $workday->duration += $entityVisit->getDuration();
                 $workday->completed += $entityVisit->completed === 1 ? 1 : 0;
 
                 $this->Workdays->saveOrFail($workday);
-
             }
 
             $connection = $this->Visits->getConnection();
 
             $entityVisit->address->set([
-                'foreign_table' => 'visits',
-                'state' => '',
-                'city' => '',
+                "foreign_table" => "visits",
+                "state" => "",
+                "city" => "",
             ]);
 
-            $connection->transactional(function() use ($entityVisit) {
-                $this->Visits->saveOrFail($entityVisit, [
-                    'associated' => ['Address']
-                ]);
-            });
+            $this->Visits->saveOrFail($entityVisit, [
+                "associated" => ["Address"],
+            ]);
 
             $this->set([
-                'status_code' => 200,
-                'status' => 'success',
-                'message' => 'visit created successfully',
-                'data' => $entityVisit
+                "status_code" => 200,
+                "status" => "success",
+                "message" => "visit created successfully",
+                "data" => $entityVisit,
             ]);
-        } catch(PersistenceFailedException $e) {
+        } catch (PersistenceFailedException $e) {
+            $this->Visits->getConnection()->rollback();
 
             $this->response = $this->response->withStatus(500);
 
             $this->set([
-                'status_code' => 500,
-                'error' => 'failed to create visit',
-                'message' => 'database error while created visit',
-                'details' => $e->getEntity()->getErrors()
+                "status_code" => 500,
+                "error" => "failed to create visit",
+                "message" => "database error while created visit",
+                "details" => $e->getEntity()->getErrors(),
             ]);
         }
     }
 
-    public function edit(): void {
-        $id = $this->request->getParam('id');
+    public function edit(): void
+    {
+        $id = $this->request->getParam("id");
 
         $entityVisit = $this->Visits->get($id, [
-            'contain' => ['Address']
+            "contain" => ["Address"],
         ]);
 
         $payload = $this->request->getData();
 
         $entityVisit = $this->Visits->patchEntity($entityVisit, $payload);
 
-        if($error = $entityVisit->getErrors()) {
-
+        if ($error = $entityVisit->getErrors()) {
             $this->set([
-                'status_code' => 400,
-                'error' => 'validation failed',
-                'message' => 'please check the provided data',
-                'details' => $error
+                "status_code" => 400,
+                "error" => "validation failed",
+                "message" => "please check the provided data",
+                "details" => $error,
             ]);
 
             $this->response = $this->response->withStatus(400);
@@ -142,11 +138,16 @@ class VisitController extends ApiController
         }
 
         try {
-
-            if($entityVisit->address->isDirty('postal_code')) {
-
-                if($this->Addresses->deleteAll(['id' => $entityVisit->address->id]) === 0) {
-                    throw new PersistenceFailedException($entityVisit->address, 'failed while deleting address');
+            if ($entityVisit->address->isDirty("postal_code")) {
+                if (
+                    $this->Addresses->deleteAll([
+                        "id" => $entityVisit->address->id,
+                    ]) === 0
+                ) {
+                    throw new PersistenceFailedException(
+                        $entityVisit->address,
+                        "failed while deleting address",
+                    );
                 }
 
                 $postalCode = $entityVisit->address->postal_code;
@@ -155,15 +156,19 @@ class VisitController extends ApiController
 
                 $responseServiceCep = $service->consult($postalCode);
 
-                if($responseServiceCep instanceof CepRequestError) {
-
-                    $isCepNotFound = $responseServiceCep == CepRequestError::CepNotFound;
+                if ($responseServiceCep instanceof CepRequestError) {
+                    $isCepNotFound =
+                        $responseServiceCep == CepRequestError::CepNotFound;
 
                     $this->set([
-                        'status_code' => 400,
-                        'error' => sprintf('cep %s search failed', $postalCode),
-                        'message' => $isCepNotFound ? 'please check your postal code' : 'our providers are down, wait a few minutes and search again',
-                        'details' => $isCepNotFound ? 'cep not found' : 'providers are down'
+                        "status_code" => 400,
+                        "error" => sprintf("cep %s search failed", $postalCode),
+                        "message" => $isCepNotFound
+                            ? "please check your postal code"
+                            : "our providers are down, wait a few minutes and search again",
+                        "details" => $isCepNotFound
+                            ? "cep not found"
+                            : "providers are down",
                     ]);
 
                     $this->response = $this->response->withStatus(400);
@@ -171,36 +176,35 @@ class VisitController extends ApiController
                     return;
                 }
 
-                $cepData = $responseServiceCep
-                    ->toCollection()
-                    ->toArray();
+                $cepData = $responseServiceCep->toCollection()->toArray();
 
                 $entityVisit->address = $this->Addresses->newEntity([
-                    'foreign_table' => 'visits',
-                    'postal_code' => $cepData['postal_code'],
-                    'state' => $cepData['uf'],
-                    'city' => $cepData['city'],
-                    'sublocality' => $payload['address']['sublocality'],
-                    'street' => $payload['address']['street'],
-                    'street_number' => $payload['address']['street_number'],
+                    "foreign_table" => "visits",
+                    "postal_code" => $cepData["postal_code"],
+                    "state" => $cepData["uf"],
+                    "city" => $cepData["city"],
+                    "sublocality" => $payload["address"]["sublocality"],
+                    "street" => $payload["address"]["street"],
+                    "street_number" => $payload["address"]["street_number"],
                 ]);
             }
 
-            if($entityVisit->isDirty('date')) {
+            if ($entityVisit->isDirty("date")) {
                 $this->updateWorkdayDate($entityVisit);
             }
 
-            if($entityVisit->isDirty('forms') || $entityVisit->isDirty('products')) {
-
+            if (
+                $entityVisit->isDirty("forms") ||
+                $entityVisit->isDirty("products")
+            ) {
                 $ret = $this->updateWorkdayDuration($entityVisit);
 
-                if($ret != ReturnValue::NOERROR) {
-
+                if ($ret != ReturnValue::NOERROR) {
                     $this->set([
-                        'status_code' => 400,
-                        'error' => 'failed to update duration workday',
-                        'message' => 'failed while updating duration visit',
-                        'details' => $ret->getMessage()
+                        "status_code" => 400,
+                        "error" => "failed to update duration workday",
+                        "message" => "failed while updating duration visit",
+                        "details" => $ret->getMessage(),
                     ]);
 
                     $this->response = $this->response->withStatus(400);
@@ -211,48 +215,49 @@ class VisitController extends ApiController
 
             $connection = $this->Visits->getConnection();
 
-            $connection->transactional(function() use ($entityVisit) {
+            $connection->transactional(function () use ($entityVisit) {
                 $this->Visits->saveOrFail($entityVisit, [
-                    'associated' => ['Address']
+                    "associated" => ["Address"],
                 ]);
             });
 
             $this->set([
-                'status_code' => 200,
-                'status' => 'success',
-                'message' => 'visit updated successfully',
-                'data' => $entityVisit
+                "status_code" => 200,
+                "status" => "success",
+                "message" => "visit updated successfully",
+                "data" => $entityVisit,
             ]);
-        } catch(PersistenceFailedException $e) {
-
+        } catch (PersistenceFailedException $e) {
             $this->response = $this->response->withStatus(500);
 
             $this->set([
-                'status_code' => 500,
-                'error' => 'failed to update visit',
-                'message' => 'database error while updated visit',
-                'details' => $e->getEntity()->getErrors()
+                "status_code" => 500,
+                "error" => "failed to update visit",
+                "message" => "database error while updated visit",
+                "details" => $e->getEntity()->getErrors(),
             ]);
         }
     }
 
-    private function updateWorkdayDuration($entityVisit): ReturnValue {
-
+    private function updateWorkdayDuration($entityVisit): ReturnValue
+    {
         $entityWorkday = $this->Workdays
             ->find()
-            ->where([ 'date' => $entityVisit->date ])
+            ->where(["date" => $entityVisit->date])
             ->first();
 
-        $totalDuration = $this->Visits
-            ->find()
-            ->select(['total' => $this->Visits->query()->func()->sum('duration')])
-            ->where([
-                'date' => $entityVisit->date,
-                'id !=' => $entityVisit->id
-            ])
-            ->total + $entityVisit->getDuration();
+        $totalDuration =
+            $this->Visits
+                ->find()
+                ->select([
+                    "total" => $this->Visits->query()->func()->sum("duration"),
+                ])
+                ->where([
+                    "date" => $entityVisit->date,
+                    "id !=" => $entityVisit->id,
+                ])->total + $entityVisit->getDuration();
 
-        if($totalDuration > 28800) {
+        if ($totalDuration > 28800) {
             return ReturnValue::DURATION_WORKDAYS_EXCEEDED;
         }
 
@@ -263,19 +268,26 @@ class VisitController extends ApiController
         return ReturnValue::NOERROR;
     }
 
-    private function updateWorkdayDate($entityVisit) {
-
+    private function updateWorkdayDate($entityVisit)
+    {
         $oldWorkdayEntity = $this->Workdays
             ->find()
-            ->where([ 'date' => $entityVisit->getOriginal('date') ])
+            ->where(["date" => $entityVisit->getOriginal("date")])
             ->first();
 
-        if(!is_null($oldWorkdayEntity)) {
-            $oldWorkdayEntity->duration = max(0, $oldWorkdayEntity->duration - $entityVisit->getOriginal('duration'));
+        if (!is_null($oldWorkdayEntity)) {
+            $oldWorkdayEntity->duration = max(
+                0,
+                $oldWorkdayEntity->duration -
+                    $entityVisit->getOriginal("duration"),
+            );
             $oldWorkdayEntity->visits = max(0, $oldWorkdayEntity->visits - 1);
 
-            if($entityVisit->getOriginal('completed') === 1) {
-                $oldWorkdayEntity->completed = max(0, $oldWorkdayEntity->completed - 1);
+            if ($entityVisit->getOriginal("completed") === 1) {
+                $oldWorkdayEntity->completed = max(
+                    0,
+                    $oldWorkdayEntity->completed - 1,
+                );
             }
 
             $this->Workdays->saveOrFail($oldWorkdayEntity);
@@ -283,22 +295,21 @@ class VisitController extends ApiController
 
         $newWorkdayEntity = $this->Workdays
             ->find()
-            ->where([ 'date' => $entityVisit->date ])
+            ->where(["date" => $entityVisit->date])
             ->first();
 
-        if(is_null($newWorkdayEntity)) {
-
+        if (is_null($newWorkdayEntity)) {
             $newWorkdayEntity = $this->Workdays->newEntity([
-                'date' => $entityVisit->date,
-                'duration' => $entityVisit->getDuration(),
-                'visits' => 1,
-                'completed' => $entityVisit->completed === 1 ? 1 : 0
+                "date" => $entityVisit->date,
+                "duration" => $entityVisit->getDuration(),
+                "visits" => 1,
+                "completed" => $entityVisit->completed === 1 ? 1 : 0,
             ]);
         } else {
-
             $newWorkdayEntity->visits++;
             $newWorkdayEntity->duration += $entityVisit->getDuration();
-            $newWorkdayEntity->completed += $entityVisit->completed === 1 ? 1 : 0;
+            $newWorkdayEntity->completed +=
+                $entityVisit->completed === 1 ? 1 : 0;
         }
 
         $this->Workdays->saveOrFail($newWorkdayEntity);
